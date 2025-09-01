@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        svg {
+            border: 1px solid black;
+        }
+        .circle, .square {
+            stroke: black;
+            fill: white;
+            stroke-width: 2px;
+        }
+        text {
+            font-family: "Arial", sans-serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Online facility assignment on Euclidean plane</h1>
+    <svg id="svg1" width="500" height="500">
+        <!-- Circles and Squares will be drawn here -->
+    </svg>
+
+    <script>
+        // Select the SVG element
+        const svg = d3.select("#svg1");
+
+        // Data for shapes (positions and sizes)
+        const shapes = [
+            { type: "circle", cx: 100, cy: 100, r: 40 },
+            { type: "circle", cx: 300, cy: 100, r: 60 },
+            { type: "square", x: 100, y: 250, size: 80 },
+            { type: "square", x: 250, y: 250, size: 100 }
+        ];
+        
+
+        // Draw squares
+        function drawSquare(x, y, width, height) {
+            svg.append("rect")
+                .attr("class", "square")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("width", width)
+                .attr("height", height);
+        }
+
+        function drawCircle(x, y, r) {
+            svg.append("circle")
+                .attr("class", "circle")
+                .attr("cx", x)
+                .attr("cy", y)
+                .attr("r", r);
+        }
+
+        // Function to draw italicized text with subscript and superscript
+        function drawText(x, y, fontSize, textContent) {
+            const text = svg.append("text")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("font-size", fontSize)
+                .attr("class", "italic-text");
+
+            const regex = /(<sub>.*?<\/sub>|<sup>.*?<\/sup>|[^<]+)/g;
+            const parts = textContent.match(regex) || [];
+
+            parts.forEach(part => {
+                if (part.startsWith("<sub>")) {
+                text.append("tspan")
+                    .attr("font-size", fontSize * 0.8)
+                    .attr("baseline-shift", "sub")
+                    .text(part.replace(/<\/?sub>/g, ""));
+                } else if (part.startsWith("<sup>")) {
+                text.append("tspan")
+                    .attr("font-size", fontSize * 0.8)
+                    .attr("baseline-shift", "super")
+                    .text(part.replace(/<\/?sup>/g, ""));
+                } else {
+                text.append("tspan").text(part);
+                }
+            });
+        }
+
+        function drawLine(x1, y1, x2, y2, style, arrow) {
+            // Define marker once per svg (for arrowhead)
+            if (svg.select("defs").empty()) {
+                const defs = svg.append("defs");
+                defs.append("marker")
+                .attr("id", "arrowhead")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 10)        // how far back the arrowhead sits on the line
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5") // arrowhead shape
+                .attr("fill", "black");
+            }
+
+            // Draw the line with arrowhead
+            const line = svg.append("line")
+                .attr("x1", x1)
+                .attr("y1", y1)
+                .attr("x2", x2)
+                .attr("y2", y2)
+                .attr("stroke", "black")
+                .attr("stroke-width", 2);
+            
+            if (arrow==true){
+                line.attr("marker-end", "url(#arrowhead)");
+            }
+
+            // Apply style
+            if (style === "dashed") {
+                line.attr("stroke-dasharray", "5,5");
+            }
+        }
+
+        function distance(x1, y1, x2, y2){
+        return Math.sqrt((x1-x2)**2 + (y1-y2)**2)
+        }
+
+        var text_translate_x = 10
+        var text_translate_y = 55
+        var text_size = 24
+        // Example calls to draw squares
+        var f_j_x = 50
+        var f_j_y = 350
+        var f_width = 30
+        var f_height = 30
+
+        var c_i_x = 200
+        var c_i_y = 250
+        var c_r = 15
+        var c_text_translate_x = -7
+        var c_text_translate_y = 35
+        
+        drawCircle(f_j_x, f_j_y, distance(f_j_x, f_j_y, c_i_x, c_i_y));
+
+        drawSquare(f_j_x, f_j_y, f_width, f_height);  // Square at (100, 350) with width and height of 80
+        drawText(f_j_x+text_translate_x, f_j_y+text_translate_y, text_size, "f<sub>j</sub>");
+        var f_k_x = 400
+        var f_k_y = 350
+        drawSquare(f_k_x, f_k_y, 30, 30);
+        drawText(f_k_x+text_translate_x, f_k_y+text_translate_y, text_size, "f<sub>k</sub>");
+
+        
+        // Example calls to the function
+        drawCircle(c_i_x, c_i_y, c_r);
+        drawText(c_i_x+c_text_translate_x, c_i_y+c_text_translate_y, text_size, "c<sub>i</sub>");
+
+        drawLine(c_i_x, c_i_y, f_j_x, f_j_y, "solid", true)
+        drawLine(c_i_x, c_i_y, f_k_x, f_k_y, "dashed", true)
+
+        var m_x = (f_j_x+f_k_x)/2
+        var m_y = (f_j_y+f_k_y)/2
+        var m_text_translate_x = 7
+        var m_text_translate_y = 15
+        drawCircle(m_x, m_y, 2);
+        drawText(m_x+m_text_translate_x, m_y+m_text_translate_y, text_size, "m");
+        drawLine(m_x, m_y+100, m_x, m_y-200, "dashed", false)
+        
+        drawCircle(m_x, m_y-45, 2);
+        drawText(m_x+m_text_translate_x, m_y-45+m_text_translate_y, text_size, "p");
+
+    </script>
+</body>
+</html>
